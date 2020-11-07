@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/contact-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT $JAR_OPTS
+web: java  -jar target/contact-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT -b 0.0.0.0
