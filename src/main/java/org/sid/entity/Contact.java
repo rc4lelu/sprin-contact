@@ -20,7 +20,7 @@ public class Contact implements Serializable{
     private Date dateNaissance;
     private long numero;
 
-    public Contact(String nom , String prenom, String email, Date date, int numero) {
+    public Contact(String nom , String prenom, String email, Date date, long numero) {
 		this.nom = nom;
 		this.prenom = prenom;
 		this.email = email;
