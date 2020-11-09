@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,28 +44,49 @@ public class ContactRestService {
 	}
 
 	@PostMapping(path = "/", consumes = "application/json", produces = "application/json")
-	public ResponseEntity<Contact> save(@RequestBody Contact c) {
+	public ResponseEntity<Object> save(@RequestBody Contact c) {
 		try {
+
 			Contact _contact = contactRepository.save(new Contact(c.getNom(), c.getPrenom(), c.getEmail(), c.getDateNaissance(), c.getNumero()));
 			return new ResponseEntity<>(_contact, HttpStatus.CREATED);
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			List<String> messages = new ArrayList<String>();
+			String m1 = "Le nom ne peut pas etre null";
+			String m2 = "Le prenom ne peut pas etre null";
+			if (c.getNom() == null)
+				messages.add(m1);
+			if (c.getPrenom() == null)
+				messages.add(m2);
+			Error error = new Error(messages, HttpStatus.INTERNAL_SERVER_ERROR, new Date());
+			return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@DeleteMapping(path = "/{id}", produces = "application/json")
-	public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
+	public ResponseEntity<Object> delete(@PathVariable Long id) {
+		List<String> messages = new ArrayList<String>();
+		String m1 = "Une erreur s'est produite";
+		String m2 = "Verifier votre saisie";
+		messages.add(m1);
+		messages.add(m2);
+		Error error = new Error(messages, HttpStatus.INTERNAL_SERVER_ERROR, new Date());
 		try {
 			contactRepository.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 		}catch (Exception e ) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@PutMapping (path = "/{id}", consumes = "application/json", produces = "application/json")
-	public ResponseEntity<Contact> edit(@PathVariable Long id, @RequestBody Contact c) {
+	public ResponseEntity<Object> edit(@PathVariable Long id, @RequestBody Contact c) {
 		Optional<Contact> contactData = contactRepository.getContactId(id);
+		List<String> messages = new ArrayList<String>();
+		String m1 = "Ce contact n'existe pas";
+		String m2 = "Verifier votre saisie";
+		messages.add(m1);
+		messages.add(m2);
+		Error error = new Error(messages, HttpStatus.NOT_FOUND, new Date());
 		if (contactData.isPresent()) {
 			Contact _contact = contactData.get();
 			_contact.setNom(c.getNom());
@@ -74,6 +96,6 @@ public class ContactRestService {
 			_contact.setNumero(c.getNumero());
 			return new ResponseEntity<>(contactRepository.save(_contact), HttpStatus.OK);
 		} else
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 		}
 }
